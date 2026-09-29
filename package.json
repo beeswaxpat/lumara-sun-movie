@@ -1,0 +1,20 @@
+{
+  "name": "lumara-sun-movie",
+  "version": "1.1.0",
+  "private": true,
+  "description": "The last 24 hours of the Sun from NASA's Solar Dynamics Observatory, one frame every 5 minutes, rebuilt every 3 hours with plain ffmpeg and published on GitHub Pages.",
+  "license": "MIT",
+  "author": "Beeswax Pat (https://github.com/beeswaxpat)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node src/sun-movie.mjs",
+    "self-test": "node src/sun-movie.mjs --self-test",
+    "site": "node src/site.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "fit-brightness": "node tools/fit-brightness.mjs",
+    "compare-brightness": "node tools/compare-brightness.mjs"
+  }
+}

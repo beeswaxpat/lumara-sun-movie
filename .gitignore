@@ -1,0 +1,6 @@
+# Frame cache, local output and the assembled Pages site
+.cache/
+out/
+site/
+prev/
+node_modules/
