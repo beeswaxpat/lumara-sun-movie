@@ -142,7 +142,7 @@ node --test "test/*.test.mjs"              # tests (no network)
 
 Other options: `--cache-dir DIR` (default `.cache`), `--out-dir DIR` (default `out`), `--max-age-hours N` (default 3). `SUN_MOVIE_CHANNELS`, `SUN_MOVIE_BRIGHTNESS`, `SUN_MOVIE_CACHE_DIR` and `SUN_MOVIE_OUT_DIR` in the environment do the same. The first run makes about 577 requests per channel (288 pictures, about 30 MB) and takes a few minutes; later runs download only what is new.
 
-Settings (channels, sizes, limits, the look of the printed time) are in `src/config.mjs`. The look of the printed time (Roboto, 20 px, white, bottom left) is a placeholder waiting for approval.
+Settings (channels, sizes, limits, the look of the printed time) are in `src/config.mjs`. The look of the printed time (Roboto, 24 px, white, bottom left) is a placeholder waiting for approval; it was 20 px until Patrick asked for it a little larger (2026-09-29).
 
 ## License
 

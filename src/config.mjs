@@ -61,7 +61,7 @@ export const KEYFRAME_EVERY = 48; // a keyframe every 2 seconds, for seeking
 // The printed time is the capture time rounded to the nearest minute; the
 // manifest keeps the exact capture times.
 export const FONT_FILE = join(ROOT, 'fonts', 'Roboto-Regular.ttf'); // Apache 2.0, see fonts/LICENSE-Roboto.txt
-export const LABEL_SIZE = 20; // px, on the 1024 px frame
+export const LABEL_SIZE = 24; // px, on the 1024 px frame (was 20; Patrick 2026-09-29: "a little larger", about a fifth)
 export const LABEL_MARGIN = 16; // px from the left and bottom edges
 export const LABEL_COLOR = 'white@0.85';
 

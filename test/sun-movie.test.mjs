@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process';
 
 import {
   CHANNELS, SLOT_COUNT, SLOT_SECONDS, SERVERS, TARGET_MIN_BYTES, TARGET_MAX_BYTES, CRF_MAX, CRF_MIN, DEFAULT_BRIGHTNESS, brightnessLut,
+  LABEL_SIZE, LABEL_MARGIN, SIZE_PX,
 } from '../src/config.mjs';
 import { HelioviewerClient, isoSeconds, parseHelioviewerDate, jpegSize } from '../src/helioviewer.mjs';
 import {
@@ -17,6 +18,7 @@ import {
 } from '../src/frames.mjs';
 import {
   ffconcatQuote, filterValue, concatList, nextCrf, checkProbe, checkLabel, isFaststart, topLevelBoxes, videoFilter, ffmpegArgs, selfTest,
+  LABEL_BOX_W, LABEL_BOX_H,
 } from '../src/encode.mjs';
 import { parseArgs, buildManifest, newestLabel, lutFor } from '../src/sun-movie.mjs';
 
@@ -89,6 +91,30 @@ test('ffconcat and filter escaping', () => {
   assert.match(vf, /^setpts=N\/\(24\*TB\),scale=1024:1024:/);
   assert.match(vf, /drawtext=fontfile=D\\\\:\/f\/Roboto-Regular\.ttf:text='%\{metadata\\:lumara_time\}'/);
   assert.doesNotMatch(vf, /lut1d/);
+});
+
+test('the printed time: 24 px (a fifth larger than 20), bottom left, inside the frame and clear of the Sun', () => {
+  // Patrick 2026-09-29: "make the time printed on each frame a little
+  // larger; the format is fine". Still PLACEHOLDER (the look awaits approval).
+  assert.equal(LABEL_SIZE, 24);
+  const vf = videoFilter({ fontFile: '/f/Roboto-Regular.ttf' });
+  assert.match(vf, /:fontsize=24:/);
+  assert.match(vf, new RegExp(`:x=${LABEL_MARGIN}:y=h-${LABEL_MARGIN}-lh$`));
+  // "2026-09-29 07:30 UTC" drawn by this filter on a real 1024 px 171 frame
+  // (2026-09-29 07:30 UTC) covered x 17 to 252 and y 980 to 996: 236 by 17 px.
+  // Roboto's digits are all one width, so every time is as wide. Allow a
+  // little more for other fonts' builds.
+  const w = 250, h = LABEL_SIZE;
+  // Inside the frame, and inside the box the label check measures.
+  assert.ok(LABEL_MARGIN + w < SIZE_PX && LABEL_MARGIN + h < SIZE_PX);
+  assert.ok(236 <= LABEL_BOX_W && h <= LABEL_BOX_H);
+  // Clear of the Sun's disc: an AIA frame at 1024 px shows the Sun about 400
+  // px in radius around the middle (1600 px at 4096; 407 px at the most, in
+  // early January). The label's corner nearest the middle stays well
+  // outside it (535 px from the middle as measured, over 1.2 radii here).
+  const nx = LABEL_MARGIN + w, ny = SIZE_PX - LABEL_MARGIN - h;
+  const dist = Math.hypot(nx - SIZE_PX / 2, ny - SIZE_PX / 2);
+  assert.ok(dist > 1.2 * 407, `the label's nearest corner is ${dist.toFixed(0)} px from the middle`);
 });
 
 test('the brightness curve goes in before the scale, on the frames as decoded', () => {
