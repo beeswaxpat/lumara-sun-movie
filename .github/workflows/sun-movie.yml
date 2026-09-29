@@ -1,0 +1,153 @@
+# The 24 hour Sun movie, rebuilt every 3 hours and published on GitHub Pages.
+#
+# Each run: test the code, prove the runner's ffmpeg prints the frame time
+# and applies the brightness curve, fetch only the frames that are new since
+# the last run (the frame cache is kept in the Actions cache), build and
+# check both movies, then publish ONLY the fresh, checked movies, their
+# manifests and a tiny index.html as a single commit force-pushed to the
+# gh-pages branch, so its history never grows.
+#
+# Fails closed: a movie whose newest frame is more than 3 hours old, that is
+# missing frames past the limit, or whose printed time cannot be seen is never
+# published. A channel that failed keeps its last published copy only while
+# that copy is under 6 hours old. With nothing fresh, nothing is pushed and
+# the run turns red (GitHub emails the owner); the old manifests keep their
+# true frame times, so the app and the site see the age.
+#
+# Brightness: "nasa" (the default) or "off", from the repository variable
+# SUN_MOVIE_BRIGHTNESS (Settings, Secrets and variables, Actions, Variables).
+name: Sun movie
+
+on:
+  schedule:
+    # Every 3 hours at minute 23, off the top of the hour when schedules pile up.
+    - cron: "23 */3 * * *"
+  workflow_dispatch:
+
+# Only the built-in GITHUB_TOKEN; no other secret.
+permissions:
+  contents: write # force-push the gh-pages branch
+  actions: write # delete older frame caches, so only the newest two are kept
+  pages: write # ask Pages to deploy: pushes made with GITHUB_TOKEN do not start a Pages build on their own
+
+# Two runs never overlap: a new run waits for the one in progress.
+concurrency:
+  group: sun-movie
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04 # its ffmpeg package is 6.1; the code works on 6.1 and 8.0
+    timeout-minutes: 45
+    env:
+      SUN_MOVIE_BRIGHTNESS: ${{ vars.SUN_MOVIE_BRIGHTNESS || 'nasa' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      # No npm packages. ffmpeg with libx264, drawtext and lut1d, and ffprobe,
+      # from Ubuntu's own package.
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends ffmpeg
+          ffmpeg -hide_banner -version | head -n 1
+
+      - name: Test
+        run: node --test "test/*.test.mjs"
+
+      - name: Check ffmpeg prints the frame time and applies the brightness curve
+        run: node src/sun-movie.mjs --self-test
+
+      - name: Restore the frame cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache
+          key: sun-frames-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: sun-frames-
+
+      # Leaves only movies that passed every check in out/, so the site step
+      # can take whatever is there even when one channel failed; the last step
+      # still turns the run red.
+      - name: Build and check the movies
+        id: build
+        continue-on-error: true
+        run: node src/sun-movie.mjs
+
+      # The cache on disk is bounded by the script (27 hours of frames, and a
+      # hard ceiling per channel); here the Actions cache keeps only the
+      # newest two entries (about 75 MB each).
+      - name: Save the frame cache
+        if: ${{ !cancelled() }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache
+          key: sun-frames-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Delete older frame caches
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh cache list --repo "$GITHUB_REPOSITORY" --key sun-frames- --sort created_at --order desc --limit 100 \
+            --json id --jq '.[2:][].id' | while read -r id; do
+            gh cache delete "$id" --repo "$GITHUB_REPOSITORY" || true
+          done
+
+      - name: Get the files gh-pages serves now
+        run: |
+          mkdir -p prev
+          if git fetch --quiet --depth=1 origin gh-pages; then
+            git archive FETCH_HEAD | tar -x -C prev
+          else
+            echo "No gh-pages branch yet."
+          fi
+          ls -la prev
+
+      - name: Put the site together (fresh, checked movies only)
+        run: node src/site.mjs --out-dir out --previous-dir prev --site-dir site
+
+      - name: Publish to gh-pages (one commit, force-pushed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd site
+          git init --quiet -b gh-pages
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit --quiet -m "Sun movie, built $(date -u +%Y-%m-%dT%H:%MZ)"
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          echo "::add-mask::$auth"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $auth" \
+            push --force --quiet "https://github.com/$GITHUB_REPOSITORY.git" gh-pages
+          git log --stat --oneline
+
+      - name: Ask GitHub Pages to deploy it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.html_url' > pages_url.txt 2>/dev/null; then
+            echo "::warning::GitHub Pages is not switched on yet (Settings, Pages, Deploy from a branch, gh-pages, / (root)). The branch is pushed."
+            exit 0
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '.status'
+          for i in $(seq 1 30); do
+            sleep 10
+            status=$(gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest" --jq '.status')
+            echo "Pages build: $status"
+            [ "$status" = "built" ] && { echo "Live at $(cat pages_url.txt)"; exit 0; }
+            [ "$status" = "errored" ] && { echo "::error::The Pages build failed."; exit 1; }
+          done
+          echo "::warning::The Pages build has not finished after 5 minutes; it may still complete."
+
+      - name: Fail the run if a channel failed
+        if: ${{ steps.build.outcome == 'failure' }}
+        run: |
+          cat out/run-summary.json || true
+          exit 1
