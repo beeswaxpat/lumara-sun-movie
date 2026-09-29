@@ -1,0 +1,317 @@
+{
+ "about": "Brightness curves for the \"nasa\" option: Helioviewer frames made as bright as NASA SDO browse images of the same instant. Values are 0 to 255; the curve arrays are red, green, blue.",
+ "method": "Histogram matching per colour channel on pooled pixels of several same-instant pairs, NASA label rows (y >= 940) left out, then below the first level where a curve is no steeper than 4 the matched colour fades to black by the same factor in all three channels (the source quantile is the common position), so the faint corona Helioviewer cuts to black does not start with a hard edge or change colour; applied with ffmpeg lut1d, linear interpolation.",
+ "meanLuma": "BT.709 luma, 0 to 255, over rows 0 to 939",
+ "meanDifferenceFromNasa": "mean absolute difference per colour value, 0 to 255, over rows 0 to 939",
+ "requests": 19,
+ "channels": {
+  "171": {
+   "channel": "171",
+   "name": "AIA 171",
+   "fittedUtc": "2026-09-29T07:51:41Z",
+   "darkFade": {
+    "fromQuantile": 0.22722,
+    "toQuantile": 0.31001
+   },
+   "heldOut": {
+    "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_105634_1024_0171.jpg",
+    "nasaUtc": "2026-09-28T10:56:34Z"
+   },
+   "average": {
+    "meanLuma": {
+     "nasa": 63.3,
+     "before": 37.02,
+     "after": 62.15
+    },
+    "meanDifferenceFromNasa": {
+     "before": 21.4,
+     "after": 2.72
+    }
+   },
+   "pairs": [
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_000710_1024_0171.jpg",
+     "nasaUtc": "2026-09-27T00:07:10Z",
+     "helioviewerUtc": "2026-09-27T00:06:57Z",
+     "helioviewerId": "192464812",
+     "deltaSeconds": -13,
+     "meanLuma": {
+      "nasa": 63.04,
+      "before": 36.8,
+      "after": 61.91
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.38,
+      "after": 2.74
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_050658_1024_0171.jpg",
+     "nasaUtc": "2026-09-27T05:06:58Z",
+     "helioviewerUtc": "2026-09-27T05:06:57Z",
+     "helioviewerId": "192469852",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 62.86,
+      "before": 36.64,
+      "after": 61.74
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.35,
+      "after": 2.7
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_095446_1024_0171.jpg",
+     "nasaUtc": "2026-09-27T09:54:46Z",
+     "helioviewerUtc": "2026-09-27T09:54:57Z",
+     "helioviewerId": "192475011",
+     "deltaSeconds": 11,
+     "meanLuma": {
+      "nasa": 63.28,
+      "before": 37.01,
+      "after": 62.14
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.41,
+      "after": 2.75
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_145646_1024_0171.jpg",
+     "nasaUtc": "2026-09-27T14:56:46Z",
+     "helioviewerUtc": "2026-09-27T14:56:45Z",
+     "helioviewerId": "192480631",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 63.19,
+      "before": 36.89,
+      "after": 62.04
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.42,
+      "after": 2.72
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_194646_1024_0171.jpg",
+     "nasaUtc": "2026-09-27T19:46:46Z",
+     "helioviewerUtc": "2026-09-27T19:46:33Z",
+     "helioviewerId": "192486177",
+     "deltaSeconds": -13,
+     "meanLuma": {
+      "nasa": 63.34,
+      "before": 37.03,
+      "after": 62.17
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.42,
+      "after": 2.75
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_004634_1024_0171.jpg",
+     "nasaUtc": "2026-09-28T00:46:34Z",
+     "helioviewerUtc": "2026-09-28T00:46:33Z",
+     "helioviewerId": "192492442",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 63.83,
+      "before": 37.48,
+      "after": 62.63
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.46,
+      "after": 2.75
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_053746_1024_0171.jpg",
+     "nasaUtc": "2026-09-28T05:37:46Z",
+     "helioviewerUtc": "2026-09-28T05:37:45Z",
+     "helioviewerId": "192498136",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 63.43,
+      "before": 37.16,
+      "after": 62.28
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.39,
+      "after": 2.69
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_104710_1024_0171.jpg",
+     "nasaUtc": "2026-09-28T10:47:10Z",
+     "helioviewerUtc": "2026-09-28T10:46:57Z",
+     "helioviewerId": "192517701",
+     "deltaSeconds": -13,
+     "meanLuma": {
+      "nasa": 63.43,
+      "before": 37.17,
+      "after": 62.3
+     },
+     "meanDifferenceFromNasa": {
+      "before": 21.37,
+      "after": 2.68
+     }
+    }
+   ]
+  },
+  "304": {
+   "channel": "304",
+   "name": "AIA 304",
+   "fittedUtc": "2026-09-29T07:51:44Z",
+   "darkFade": {
+    "fromQuantile": 0.30293,
+    "toQuantile": 0.30293
+   },
+   "heldOut": {
+    "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_105806_1024_0304.jpg",
+    "nasaUtc": "2026-09-28T10:58:06Z"
+   },
+   "average": {
+    "meanLuma": {
+     "nasa": 22.54,
+     "before": 20.09,
+     "after": 22.51
+    },
+    "meanDifferenceFromNasa": {
+     "before": 6.87,
+     "after": 2.77
+    }
+   },
+   "pairs": [
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_000906_1024_0304.jpg",
+     "nasaUtc": "2026-09-27T00:09:06Z",
+     "helioviewerUtc": "2026-09-27T00:09:17Z",
+     "helioviewerId": "192464858",
+     "deltaSeconds": 11,
+     "meanLuma": {
+      "nasa": 22.92,
+      "before": 20.57,
+      "after": 22.87
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.96,
+      "after": 2.84
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_045854_1024_0304.jpg",
+     "nasaUtc": "2026-09-27T04:58:54Z",
+     "helioviewerUtc": "2026-09-27T04:58:41Z",
+     "helioviewerId": "192469631",
+     "deltaSeconds": -13,
+     "meanLuma": {
+      "nasa": 22.65,
+      "before": 20.27,
+      "after": 22.6
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.89,
+      "after": 2.78
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_095530_1024_0304.jpg",
+     "nasaUtc": "2026-09-27T09:55:30Z",
+     "helioviewerUtc": "2026-09-27T09:55:17Z",
+     "helioviewerId": "192475530",
+     "deltaSeconds": -13,
+     "meanLuma": {
+      "nasa": 22.7,
+      "before": 20.35,
+      "after": 22.73
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.92,
+      "after": 2.89
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_144854_1024_0304.jpg",
+     "nasaUtc": "2026-09-27T14:48:54Z",
+     "helioviewerUtc": "2026-09-27T14:48:53Z",
+     "helioviewerId": "192480671",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 22.57,
+      "before": 20.16,
+      "after": 22.54
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.83,
+      "after": 2.69
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/27/20260927_194830_1024_0304.jpg",
+     "nasaUtc": "2026-09-27T19:48:30Z",
+     "helioviewerUtc": "2026-09-27T19:48:41Z",
+     "helioviewerId": "192486588",
+     "deltaSeconds": 11,
+     "meanLuma": {
+      "nasa": 22.59,
+      "before": 20.11,
+      "after": 22.54
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.89,
+      "after": 2.82
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_004854_1024_0304.jpg",
+     "nasaUtc": "2026-09-28T00:48:54Z",
+     "helioviewerUtc": "2026-09-28T00:49:05Z",
+     "helioviewerId": "192492541",
+     "deltaSeconds": 11,
+     "meanLuma": {
+      "nasa": 22.55,
+      "before": 20.07,
+      "after": 22.53
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.9,
+      "after": 2.85
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_054830_1024_0304.jpg",
+     "nasaUtc": "2026-09-28T05:48:30Z",
+     "helioviewerUtc": "2026-09-28T05:48:29Z",
+     "helioviewerId": "192498220",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 22.18,
+      "before": 19.66,
+      "after": 22.17
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.79,
+      "after": 2.65
+     }
+    },
+    {
+     "nasaImage": "https://sdo.gsfc.nasa.gov/assets/img/browse/2026/09/28/20260928_104842_1024_0304.jpg",
+     "nasaUtc": "2026-09-28T10:48:42Z",
+     "helioviewerUtc": "2026-09-28T10:48:41Z",
+     "helioviewerId": "192517811",
+     "deltaSeconds": -1,
+     "meanLuma": {
+      "nasa": 22.12,
+      "before": 19.56,
+      "after": 22.12
+     },
+     "meanDifferenceFromNasa": {
+      "before": 6.77,
+      "after": 2.67
+     }
+    }
+   ]
+  }
+ }
+}
