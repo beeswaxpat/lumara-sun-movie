@@ -1,11 +1,19 @@
-# The 24 hour Sun movie, rebuilt every 3 hours and published on GitHub Pages.
+# The 24 hour Sun movie, rebuilt about every 3 hours and published on GitHub Pages.
 #
-# Each run: test the code, prove the runner's ffmpeg prints the frame time
-# and applies the brightness curve, fetch only the frames that are new since
-# the last run (the frame cache is kept in the Actions cache), build and
-# check both movies, then publish ONLY the fresh, checked movies, their
+# The schedule checks every hour. A scheduled run only rebuilds when the
+# published movies' newest frame is 170 minutes old or more (a fresh build's
+# newest frame is about 40 minutes old, so that is a rebuild about every 3
+# hours); otherwise it stops after that one check. GitHub sometimes delays or
+# drops scheduled runs by hours, and the hourly check means one missed run
+# no longer leaves the movie stale. A run started by hand always rebuilds.
+#
+# Each rebuild: test the code, prove the runner's ffmpeg prints the frame
+# time and applies the brightness curve, fetch only the frames that are new
+# since the last run (the frame cache is kept in the Actions cache), build
+# and check both movies, then publish ONLY the fresh, checked movies, their
 # manifests and a tiny index.html as a single commit force-pushed to the
-# gh-pages branch, so its history never grows.
+# gh-pages branch, so its history never grows. The run then waits until
+# Pages serves the new manifest.
 #
 # Fails closed: a movie whose newest frame is more than 3 hours old, that is
 # missing frames past the limit, or whose printed time cannot be seen is never
@@ -20,15 +28,15 @@ name: Sun movie
 
 on:
   schedule:
-    # Every 3 hours at minute 23, off the top of the hour when schedules pile up.
-    - cron: "23 */3 * * *"
+    # Every hour at minute 23, off the top of the hour when schedules pile up.
+    - cron: "23 * * * *"
   workflow_dispatch:
 
 # Only the built-in GITHUB_TOKEN; no other secret.
 permissions:
   contents: write # force-push the gh-pages branch
   actions: write # delete older frame caches, so only the newest two are kept
-  pages: write # ask Pages to deploy: pushes made with GITHUB_TOKEN do not start a Pages build on their own
+  pages: write # ask Pages to build when a push did not start a build on its own
 
 # Two runs never overlap: a new run waits for the one in progress.
 concurrency:
@@ -41,6 +49,7 @@ jobs:
     timeout-minutes: 45
     env:
       SUN_MOVIE_BRIGHTNESS: ${{ vars.SUN_MOVIE_BRIGHTNESS || 'nasa' }}
+      REBUILD_AFTER_MINUTES: "170"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,21 +60,61 @@ jobs:
           node-version: 22
           package-manager-cache: false
 
+      # Scheduled runs only: read the published manifests and rebuild when the
+      # older channel's newest frame is REBUILD_AFTER_MINUTES old or more, or
+      # when a manifest cannot be read. A run started by hand always rebuilds.
+      - name: Does the published movie need a rebuild?
+        id: need
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" != "schedule" ]; then
+            echo "Started by hand: rebuild."
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          base="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}"
+          oldest=""
+          for ch in 171 304; do
+            newest=$(curl -fsS --max-time 20 "${base}/sun-24h-${ch}.json?check=$(date +%s)" \
+              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).newestFrameUtc||"")}catch(e){console.log("")}})') || newest=""
+            echo "Channel ${ch}: newest frame ${newest:-unknown}"
+            if [ -z "$newest" ]; then oldest=""; break; fi
+            if [ -z "$oldest" ] || [ "$newest" \< "$oldest" ]; then oldest="$newest"; fi
+          done
+          if [ -z "$oldest" ]; then
+            echo "A published manifest could not be read: rebuild."
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          age=$(( ( $(date -u +%s) - $(date -u -d "$oldest" +%s) ) / 60 ))
+          echo "The older channel's newest frame is ${age} minutes old."
+          if [ "$age" -ge "$REBUILD_AFTER_MINUTES" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Still fresh: no rebuild this hour."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # No npm packages. ffmpeg with libx264, drawtext and lut1d, and ffprobe,
       # from Ubuntu's own package.
       - name: Install ffmpeg
+        if: ${{ steps.need.outputs.build == 'true' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends ffmpeg
           ffmpeg -hide_banner -version | head -n 1
 
       - name: Test
+        if: ${{ steps.need.outputs.build == 'true' }}
         run: node --test "test/*.test.mjs"
 
       - name: Check ffmpeg prints the frame time and applies the brightness curve
+        if: ${{ steps.need.outputs.build == 'true' }}
         run: node src/sun-movie.mjs --self-test
 
       - name: Restore the frame cache
+        if: ${{ steps.need.outputs.build == 'true' }}
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache
@@ -77,6 +126,7 @@ jobs:
       # still turns the run red.
       - name: Build and check the movies
         id: build
+        if: ${{ steps.need.outputs.build == 'true' }}
         continue-on-error: true
         run: node src/sun-movie.mjs
 
@@ -84,14 +134,14 @@ jobs:
       # hard ceiling per channel); here the Actions cache keeps only the
       # newest two entries (about 75 MB each).
       - name: Save the frame cache
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.need.outputs.build == 'true' }}
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .cache
           key: sun-frames-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Delete older frame caches
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.need.outputs.build == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -101,6 +151,7 @@ jobs:
           done
 
       - name: Get the files gh-pages serves now
+        if: ${{ steps.need.outputs.build == 'true' }}
         run: |
           mkdir -p prev
           if git fetch --quiet --depth=1 origin gh-pages; then
@@ -111,9 +162,11 @@ jobs:
           ls -la prev
 
       - name: Put the site together (fresh, checked movies only)
+        if: ${{ steps.need.outputs.build == 'true' }}
         run: node src/site.mjs --out-dir out --previous-dir prev --site-dir site
 
       - name: Publish to gh-pages (one commit, force-pushed)
+        if: ${{ steps.need.outputs.build == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -128,7 +181,12 @@ jobs:
             push --force --quiet "https://github.com/$GITHUB_REPOSITORY.git" gh-pages
           git log --stat --oneline
 
-      - name: Ask GitHub Pages to deploy it
+      # Success means the new manifest is being served, not that a build
+      # finished. The push normally starts a Pages build by itself; only if
+      # the new manifest is not served after 4 minutes does this ask for one.
+      # A slow Pages build is a warning, never a red run: the files are pushed.
+      - name: Wait until GitHub Pages serves the new movies
+        if: ${{ steps.need.outputs.build == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -136,15 +194,27 @@ jobs:
             echo "::warning::GitHub Pages is not switched on yet (Settings, Pages, Deploy from a branch, gh-pages, / (root)). The branch is pushed."
             exit 0
           fi
-          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '.status'
-          for i in $(seq 1 30); do
+          base=$(sed 's#/*$##' pages_url.txt)
+          manifest=""
+          for ch in 171 304; do [ -f "site/sun-24h-${ch}.json" ] && { manifest="sun-24h-${ch}.json"; break; }; done
+          if [ -z "$manifest" ]; then echo "No manifest in this build."; exit 0; fi
+          want=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).version)' "site/${manifest}")
+          served() {
+            curl -fsS --max-time 20 "${base}/${manifest}?check=$(date +%s%N)" \
+              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).version||"")}catch(e){console.log("")}})'
+          }
+          echo "Waiting for ${manifest} version ${want} at ${base}"
+          for i in $(seq 1 24); do
             sleep 10
-            status=$(gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest" --jq '.status')
-            echo "Pages build: $status"
-            [ "$status" = "built" ] && { echo "Live at $(cat pages_url.txt)"; exit 0; }
-            [ "$status" = "errored" ] && { echo "::error::The Pages build failed."; exit 1; }
+            [ "$(served || true)" = "$want" ] && { echo "Live at ${base}/"; exit 0; }
           done
-          echo "::warning::The Pages build has not finished after 5 minutes; it may still complete."
+          echo "Not served after 4 minutes; asking Pages to build."
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '.status' || true
+          for i in $(seq 1 36); do
+            sleep 10
+            [ "$(served || true)" = "$want" ] && { echo "Live at ${base}/"; exit 0; }
+          done
+          echo "::warning::Pages is not serving the new movies after 10 minutes; the branch is pushed and the build may still finish."
 
       # GitHub switches off scheduled workflows after 60 days without repository
       # activity. Re-enabling this workflow on every run keeps the schedule alive.

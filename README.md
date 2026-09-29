@@ -62,7 +62,7 @@ From the local test run of 2026-09-29:
 
 ## How it is made
 
-A GitHub Actions workflow (`.github/workflows/sun-movie.yml`) runs every 3 hours at 23 minutes past the hour, and can also be started by hand. Each run:
+A GitHub Actions workflow (`.github/workflows/sun-movie.yml`) checks every hour at 23 minutes past the hour, and can also be started by hand. A scheduled run rebuilds only when the published movies' newest frame is 170 minutes old or more, which comes to a rebuild about every 3 hours; GitHub sometimes delays or drops scheduled runs, and the hourly check means one missed run does not leave the movie stale. A run started by hand always rebuilds. Each rebuild:
 
 1. Runs the tests, then a self-test that proves the runner's ffmpeg prints the time on a frame and applies the brightness curve.
 2. For each channel, asks Helioviewer for its newest picture, lays out 288 slots 5 minutes apart back from it, and fills each slot with the real picture closest to it (within 150 seconds).
@@ -93,7 +93,7 @@ The movies are published on GitHub Pages from the `gh-pages` branch. Each run re
 - `index.html`, a small page that plays them
 - `.nojekyll`, an empty file that tells Pages to serve the files as they are
 
-So the branch never builds up history. The workflow uses only the built-in `GITHUB_TOKEN`: `contents: write` to push the branch, `actions: write` to delete old frame caches, and `pages: write` to ask Pages to deploy, because GitHub does not start a Pages build for a push made with `GITHUB_TOKEN` ([GitHub docs](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)). Two runs never overlap.
+So the branch never builds up history. The workflow uses only the built-in `GITHUB_TOKEN`: `contents: write` to push the branch, `actions: write` to delete old frame caches, and `pages: write` to ask Pages to build if the push did not start a build by itself. After the push the run waits until Pages serves the new manifest; if it is not served after 4 minutes the run asks Pages for a build, and a build still not served after 10 minutes is a warning, not a failure, because the files are already pushed. Two runs never overlap.
 
 It fails closed:
 
