@@ -30,16 +30,18 @@ The movies are 1024 by 1024 pixels, H.264, 24 frames a second, 288 frames (12 se
 
 ### The JSON file
 
+From the local test run of 2026-09-29:
+
 ```json
 {
   "schema": 1,
   "channel": "171",
   "name": "AIA 171",
   "movie": "sun-24h-171.mp4",
-  "version": "2f0b6c1d9a44",
-  "newestFrameUtc": "2026-09-29T07:34:57Z",
-  "oldestFrameUtc": "2026-09-28T07:40:09Z",
-  "newestLabel": "Newest frame 07:35 UTC",
+  "version": "329b7c1dc720",
+  "newestFrameUtc": "2026-09-29T07:30:09Z",
+  "oldestFrameUtc": "2026-09-28T07:34:45Z",
+  "newestLabel": "Newest frame 07:30 UTC",
   "frameCount": 288,
   "slots": 288,
   "missingFrames": 0,
@@ -47,11 +49,11 @@ The movies are 1024 by 1024 pixels, H.264, 24 frames a second, 288 frames (12 se
   "durationSeconds": 12,
   "width": 1024,
   "height": 1024,
-  "bytes": 8123456,
-  "sha256": "2f0b6c1d9a44...",
+  "bytes": 9218449,
+  "sha256": "329b7c1dc720305610bbab6df425ba5e04f93d9cbbfba4f3915481c4d4f82938",
   "crf": 18,
   "brightness": "nasa",
-  "builtUtc": "2026-09-29T08:02:11Z",
+  "builtUtc": "2026-09-29T07:58:51Z",
   "credit": "NASA/SDO and the AIA science team, via Helioviewer.org"
 }
 ```
