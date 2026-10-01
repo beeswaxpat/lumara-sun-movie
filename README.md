@@ -62,7 +62,7 @@ From the local test run of 2026-09-29:
 
 ## How it is made
 
-A GitHub Actions workflow (`.github/workflows/sun-movie.yml`) checks every hour at 23 minutes past the hour, and can also be started by hand. A scheduled run rebuilds only when the published movies' newest frame is 170 minutes old or more, which comes to a rebuild about every 3 hours; GitHub sometimes delays or drops scheduled runs, and the hourly check means one missed run does not leave the movie stale. A run started by hand always rebuilds. Each rebuild:
+A GitHub Actions workflow (`.github/workflows/sun-movie.yml`) checks every 10 minutes (minutes 3, 13, 23 and so on), and can also be started by hand. A scheduled run rebuilds only when the published movies' newest frame is 170 minutes old or more, which comes to a rebuild about every 3 hours. GitHub delays and drops scheduled runs (an hourly check ran 6 times in 35 hours from 2026-09-29 to 10-01), so the check runs often enough that many dropped runs still leave one that runs. A run started by hand always rebuilds. Each rebuild:
 
 1. Runs the tests, then a self-test that proves the runner's ffmpeg prints the time on a frame and applies the brightness curve.
 2. For each channel, asks Helioviewer for its newest picture, lays out 288 slots 5 minutes apart back from it, and fills each slot with the real picture closest to it (within 150 seconds).

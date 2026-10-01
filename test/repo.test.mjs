@@ -34,7 +34,7 @@ test('no personal paths, private names or dashes in the repository', () => {
 
 test('the workflow: schedule, overlap guard, permissions, fail closed', () => {
   const wf = readFileSync(join(ROOT, '.github', 'workflows', 'sun-movie.yml'), 'utf8');
-  assert.match(wf, /cron: "23 \* \* \* \*"/, 'checks every hour');
+  assert.match(wf, /cron: "3-59\/10 \* \* \* \*"/, 'checks every 10 minutes');
   assert.match(wf, /REBUILD_AFTER_MINUTES: "170"/, 'rebuilds about every 3 hours');
   assert.match(wf, /steps\.need\.outputs\.build == 'true'/, 'a fresh movie skips the rebuild');
   assert.doesNotMatch(wf, /The Pages build failed/, 'a slow Pages build is never a red run');

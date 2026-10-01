@@ -1,11 +1,13 @@
 # The 24 hour Sun movie, rebuilt about every 3 hours and published on GitHub Pages.
 #
-# The schedule checks every hour. A scheduled run only rebuilds when the
+# The schedule checks every 10 minutes. A scheduled run only rebuilds when the
 # published movies' newest frame is 170 minutes old or more (a fresh build's
 # newest frame is about 40 minutes old, so that is a rebuild about every 3
-# hours); otherwise it stops after that one check. GitHub sometimes delays or
-# drops scheduled runs by hours, and the hourly check means one missed run
-# no longer leaves the movie stale. A run started by hand always rebuilds.
+# hours); otherwise it stops after that one check. GitHub delays and drops
+# scheduled runs: from 2026-09-29 18:40 to 10-01 05:40 UTC the hourly check
+# ran 6 times (gaps of 3 to 7 hours), and the movie passed the app's 6 hour
+# limit. Checking every 10 minutes means many dropped checks still leave one
+# that runs. A run started by hand always rebuilds.
 #
 # Each rebuild: test the code, prove the runner's ffmpeg prints the frame
 # time and applies the brightness curve, fetch only the frames that are new
@@ -28,8 +30,9 @@ name: Sun movie
 
 on:
   schedule:
-    # Every hour at minute 23, off the top of the hour when schedules pile up.
-    - cron: "23 * * * *"
+    # Every 10 minutes from minute 3 (3, 13, 23, ...), off the top of the hour
+    # when schedules pile up.
+    - cron: "3-59/10 * * * *"
   workflow_dispatch:
 
 # Only the built-in GITHUB_TOKEN; no other secret.
