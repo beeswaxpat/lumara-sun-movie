@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "channel": "171",
+  "name": "AIA 171",
+  "movie": "sun-24h-171.mp4",
+  "version": "a91b4d248219",
+  "newestFrameUtc": "2026-10-11T00:45:09Z",
+  "oldestFrameUtc": "2026-10-10T00:49:57Z",
+  "newestLabel": "Newest frame 00:45 UTC",
+  "frameCount": 288,
+  "slots": 288,
+  "missingFrames": 0,
+  "fps": 24,
+  "durationSeconds": 12,
+  "width": 1024,
+  "height": 1024,
+  "bytes": 9348501,
+  "sha256": "a91b4d24821971b157a5711450cf7ec2555f36a49dc66682b7cfd246608281f0",
+  "crf": 18,
+  "brightness": "nasa",
+  "builtUtc": "2026-10-11T01:14:15Z",
+  "credit": "NASA/SDO and the AIA science team, via Helioviewer.org"
+}

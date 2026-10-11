@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "channel": "304",
+  "name": "AIA 304",
+  "movie": "sun-24h-304.mp4",
+  "version": "0c9fcae7d64e",
+  "newestFrameUtc": "2026-10-11T00:45:17Z",
+  "oldestFrameUtc": "2026-10-10T00:50:17Z",
+  "newestLabel": "Newest frame 00:45 UTC",
+  "frameCount": 288,
+  "slots": 288,
+  "missingFrames": 0,
+  "fps": 24,
+  "durationSeconds": 12,
+  "width": 1024,
+  "height": 1024,
+  "bytes": 6856689,
+  "sha256": "0c9fcae7d64ea8c7c4394a9b5b07c44611e09d57aec2b83a659d93855c8f3771",
+  "crf": 23,
+  "brightness": "nasa",
+  "builtUtc": "2026-10-11T01:14:56Z",
+  "credit": "NASA/SDO and the AIA science team, via Helioviewer.org"
+}

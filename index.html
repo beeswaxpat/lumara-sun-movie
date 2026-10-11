@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sun, last 24 hours</title>
+<meta name="description" content="The last 24 hours of the Sun from NASA's Solar Dynamics Observatory, one frame every 5 minutes, rebuilt every 3 hours.">
+<style>
+body{margin:0;padding:16px;background:#000;color:#eee;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1024px;margin:0 auto}
+h1{font-size:1.5rem;font-weight:600;margin:0 0 8px}
+figure{margin:0 0 24px}
+video{display:block;width:100%;height:auto;background:#000}
+figcaption{margin-top:6px;color:#ccc}
+a{color:#9cf}
+</style>
+</head>
+<body>
+<main>
+<h1>The Sun, last 24 hours</h1>
+<p>One frame every 5 minutes from NASA's Solar Dynamics Observatory, rebuilt every 3 hours. The time printed on each frame is when it was taken, in UTC.</p>
+<figure>
+<video src="sun-24h-171.mp4?v=a91b4d248219" controls muted loop playsinline preload="metadata" aria-label="AIA 171, the last 24 hours of the Sun"></video>
+<figcaption>AIA 171. Newest frame 2026-10-11 00:45 UTC. 288 frames. <a href="sun-24h-171.json">Details (JSON)</a></figcaption>
+</figure>
+<figure>
+<video src="sun-24h-304.mp4?v=0c9fcae7d64e" controls muted loop playsinline preload="metadata" aria-label="AIA 304, the last 24 hours of the Sun"></video>
+<figcaption>AIA 304. Newest frame 2026-10-11 00:45 UTC. 288 frames. <a href="sun-24h-304.json">Details (JSON)</a></figcaption>
+</figure>
+<p>Images: NASA/SDO and the AIA science team, via Helioviewer.org. Built with ffmpeg. <a href="https://github.com/beeswaxpat/lumara-sun-movie">How it is made</a>.</p>
+</main>
+</body>
+</html>
